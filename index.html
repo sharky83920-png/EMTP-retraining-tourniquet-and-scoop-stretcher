@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>115年新北TP複訓｜止血帶降位/轉換與鏟式擔架</title>
+<style>
+  :root{
+    --navy:#1f3864; --blue:#2e5a88; --line:#d9e2ef; --bg:#f5f7fb;
+    --green:#1f7a1f; --red:#b00000; --ink:#222;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Microsoft JhengHei","Noto Sans TC",system-ui,sans-serif;color:var(--ink);background:var(--bg);line-height:1.7}
+  header{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;padding:28px 18px;text-align:center}
+  header h1{margin:0 0 6px;font-size:1.45rem}
+  header p{margin:0;opacity:.9;font-size:.95rem}
+  .wrap{max-width:880px;margin:0 auto;padding:0 16px}
+  /* tabs */
+  .tabs{display:flex;gap:8px;max-width:880px;margin:18px auto 0;padding:0 16px}
+  .tab{flex:1;padding:14px 10px;border:none;border-radius:12px 12px 0 0;background:#e4eaf3;color:var(--blue);
+       font-size:1.05rem;font-weight:700;cursor:pointer;font-family:inherit}
+  .tab.active{background:#fff;color:var(--navy);box-shadow:0 -2px 6px rgba(0,0,0,.05)}
+  .panel{display:none;background:#fff;border-radius:0 0 14px 14px;padding:22px 20px;
+         box-shadow:0 4px 16px rgba(0,0,0,.06);max-width:880px;margin:0 auto 30px}
+  .panel.active{display:block}
+  h2{color:var(--navy);border-bottom:2px solid var(--line);padding-bottom:6px;margin-top:26px}
+  h2:first-child{margin-top:6px}
+  h3{color:var(--blue);margin-bottom:4px}
+  .btn{display:inline-block;background:var(--blue);color:#fff;text-decoration:none;padding:12px 20px;
+       border-radius:10px;font-weight:700;margin:8px 8px 8px 0}
+  .btn:hover{background:var(--navy)}
+  .btn.ghost{background:#eef2f8;color:var(--blue)}
+  .video{position:relative;padding-bottom:56.25%;height:0;border-radius:12px;overflow:hidden;margin:10px 0 22px;background:#000}
+  .video iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0}
+  .todo{background:#fff3cd;border-left:5px solid #e0b400;padding:10px 14px;border-radius:8px;color:#8a6d00;font-size:.92rem;margin:10px 0}
+  .note{color:#666;font-size:.88rem}
+  ul{padding-left:1.2em}
+  footer{text-align:center;color:#888;font-size:.82rem;padding:18px}
+  @media(max-width:520px){ header h1{font-size:1.15rem} .tab{font-size:.95rem} }
+</style>
+</head>
+<body>
+<header>
+  <h1>115年新北TP複訓</h1>
+  <p>止血帶降位／轉換　與　鏟式擔架　‧　技術操作站</p>
+</header>
+
+<div class="tabs">
+  <button class="tab active" data-tab="student">學員</button>
+  <button class="tab" data-tab="instructor">指導員</button>
+</div>
+
+<!-- ===== 學員 ===== -->
+<section class="panel active" id="student">
+  <h2>課程摘要</h2>
+  <p>本站三大主題：止血帶降位／轉換、SMR 證據、鏟式擔架操作。完整摘要請下載：</p>
+  <a class="btn" href="files/課程摘要_學員版.docx">⬇ 下載課程摘要</a>
+
+  <h2>示範影片</h2>
+  <h3>止血帶操作</h3>
+  <p>① 止血帶降位</p>
+  <div class="video"><iframe src="https://www.youtube.com/embed/Lh7IJP6WZno" title="止血帶降位" allowfullscreen></iframe></div>
+  <p>② 止血帶轉換</p>
+  <div class="video"><iframe src="https://www.youtube.com/embed/06RaGBRAY7E" title="止血帶轉換" allowfullscreen></iframe></div>
+  <h3>交接處出血　固定敷料</h3>
+  <p>③ 腋下出血</p>
+  <div class="video"><iframe src="https://www.youtube.com/embed/LaBekkIO2iA" title="腋下出血固定敷料" allowfullscreen></iframe></div>
+  <p>④ 頸部出血</p>
+  <div class="video"><iframe src="https://www.youtube.com/embed/aWnE9qfOS0E" title="頸部出血固定敷料" allowfullscreen></iframe></div>
+</section>
+
+<!-- ===== 指導員 ===== -->
+<section class="panel" id="instructor">
+  <h2>教學教案</h2>
+  <p>50 分鐘純技術操作站完整教案（含時間規劃、器材清單、分站流程、情境卡、同儕檢核表、鏟式器材介紹）。</p>
+  <a class="btn" href="files/指導員教案.docx">⬇ 下載教學教案</a>
+  <a class="btn ghost" href="files/鏟式擔架使用_實證引言.docx">⬇ 實證引言</a>
+  <p class="note">提醒：此頁為公開頁面，教案含解答/計分，如不希望外流可改放精簡版。</p>
+</section>
+
+<footer>
+  115年新北TP複訓　‧　教學用途　‧　以 GitHub Pages 製作
+</footer>
+
+<script>
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
+      document.querySelectorAll('.panel').forEach(function(x){x.classList.remove('active')});
+      t.classList.add('active');
+      document.getElementById(t.dataset.tab).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

@@ -35,6 +35,16 @@
   .todo{background:#fff3cd;border-left:5px solid #e0b400;padding:10px 14px;border-radius:8px;color:#8a6d00;font-size:.92rem;margin:10px 0}
   .note{color:#666;font-size:.88rem}
   ul{padding-left:1.2em}
+  /* Q&A */
+  .qa-item{position:relative;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:10px 0;background:#fff}
+  .qa-item .q{font-weight:700;color:var(--navy)}
+  .qa-item .a{margin-top:6px;white-space:pre-wrap}
+  .qa-del{position:absolute;top:10px;right:10px;background:#fbeaea;color:var(--red);border:0;border-radius:8px;padding:3px 10px;cursor:pointer;font-family:inherit;font-size:.82rem}
+  .qa-input,.qa-select,.qa-area{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:1rem;margin:4px 0 12px;background:#fff}
+  .qa-area{resize:vertical}
+  .qa-form{background:#eef4ff;border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}
+  .qa-form h3{margin-top:0}
+  .qa-msg{color:var(--green);font-size:.88rem;margin-left:8px}
   footer{text-align:center;color:#888;font-size:.82rem;padding:18px}
   @media(max-width:520px){ header h1{font-size:1.15rem} .tab{font-size:.95rem} }
   /* PDF 彈出檢視器 */
@@ -57,6 +67,7 @@
 <div class="tabs">
   <button class="tab active" data-tab="student">學員</button>
   <button class="tab" data-tab="instructor">指導員</button>
+  <button class="tab" data-tab="qa">Q&amp;A</button>
   <button class="tab" data-tab="qr">學員連結</button>
 </div>
 
@@ -101,6 +112,36 @@
   <p class="note">用法：指導員用自己的手機開這一頁，舉起來讓學員掃即可。</p>
 </section>
 
+<!-- ===== Q&A ===== -->
+<section class="panel" id="qa">
+  <h2>常見問答 Q&amp;A</h2>
+  <p class="note">學員可直接閱讀。管理者登入後可即時新增／刪除問答（任何裝置皆可，免重新部署）。</p>
+
+  <div style="margin:10px 0">
+    <button class="btn ghost" id="qaLoginBtn">管理登入</button>
+    <span id="qaWho" class="note"></span>
+  </div>
+
+  <!-- 新增表單：僅管理者可見 -->
+  <div class="qa-form" id="qaForm" style="display:none">
+    <h3>新增問答</h3>
+    <select class="qa-select" id="qaCat">
+      <option value="tourniquet">止血帶</option>
+      <option value="scoop">鏟式擔架</option>
+    </select>
+    <textarea class="qa-area" id="qaQ" rows="2" placeholder="問題 Q（例如：止血帶綁超過幾小時就不要轉換？）"></textarea>
+    <textarea class="qa-area" id="qaA" rows="4" placeholder="回答 A"></textarea>
+    <button class="btn" id="qaAddBtn">新增到清單</button>
+    <span class="qa-msg" id="qaMsg"></span>
+  </div>
+
+  <h2>止血帶</h2>
+  <div id="qaList-tourniquet"><p class="note">載入中…</p></div>
+
+  <h2>鏟式擔架</h2>
+  <div id="qaList-scoop"><p class="note">載入中…</p></div>
+</section>
+
 <footer>
   115年新北TP複訓　‧　教學用途　‧　以 GitHub Pages 製作
 </footer>
@@ -120,7 +161,96 @@
   </div>
 </div>
 
+<!-- Firebase（共用 emtp-learning-system 專案，獨立 collection: tpRetrainQA） -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
+  /* ===== Q&A（Firestore）===== */
+  const firebaseConfig = {
+    apiKey: "AIzaSyCYRUG97mj3JRz6YNRuN_UdRzgZcC1y9YE",
+    authDomain: "emtp-learning-system.firebaseapp.com",
+    projectId: "emtp-learning-system",
+    storageBucket: "emtp-learning-system.firebasestorage.app",
+    messagingSenderId: "1057617665185",
+    appId: "1:1057617665185:web:2d1902083fa21af0e7a4e0"
+  };
+  const MASTER_EMAIL = "sharky83920@gmail.com";
+  const QA_COL = "tpRetrainQA";
+  const QA_CATS = ["tourniquet","scoop"];
+
+  firebase.initializeApp(firebaseConfig);
+  const qaAuth = firebase.auth();
+  const qaDb = firebase.firestore();
+  let qaIsMaster = false;
+  let qaDocs = [];
+
+  function qaEsc(s){ return (s||"").replace(/[&<>]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[m];}); }
+  function qaShowMsg(t){ var e=document.getElementById("qaMsg"); e.textContent=t; setTimeout(function(){e.textContent="";},3000); }
+
+  document.getElementById("qaLoginBtn").addEventListener("click",function(){
+    if(qaAuth.currentUser){ qaAuth.signOut(); return; }
+    qaAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+      .catch(function(e){ alert("登入失敗："+e.message); });
+  });
+
+  qaAuth.onAuthStateChanged(function(u){
+    qaIsMaster = !!u && u.email === MASTER_EMAIL;
+    document.getElementById("qaForm").style.display = qaIsMaster ? "block" : "none";
+    document.getElementById("qaLoginBtn").textContent = u ? "登出" : "管理登入";
+    document.getElementById("qaWho").textContent = u
+      ? (qaIsMaster ? ("管理者："+u.email) : ("（"+u.email+" 無編輯權限）"))
+      : "";
+    qaRender();
+  });
+
+  document.getElementById("qaAddBtn").addEventListener("click",function(){
+    var cat=document.getElementById("qaCat").value;
+    var q=document.getElementById("qaQ").value.trim();
+    var a=document.getElementById("qaA").value.trim();
+    if(!q||!a){ qaShowMsg("請填寫問題與回答"); return; }
+    qaDb.collection(QA_COL).add({
+      category:cat, q:q, a:a,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function(){
+      document.getElementById("qaQ").value="";
+      document.getElementById("qaA").value="";
+      qaShowMsg("已新增 ✅");
+    }).catch(function(e){ qaShowMsg("新增失敗："+e.message); });
+  });
+
+  qaDb.collection(QA_COL).orderBy("createdAt","asc").onSnapshot(function(snap){
+    qaDocs = snap.docs.map(function(d){ var o=d.data(); o.id=d.id; return o; });
+    qaRender();
+  }, function(e){
+    QA_CATS.forEach(function(k){
+      var box=document.getElementById("qaList-"+k);
+      if(box) box.innerHTML='<p class="note">Q&amp;A 尚未啟用（請管理者在 Firebase 發布 Firestore 規則）。</p>';
+    });
+  });
+
+  function qaRender(){
+    QA_CATS.forEach(function(k){
+      var box=document.getElementById("qaList-"+k);
+      if(!box) return;
+      var items=qaDocs.filter(function(x){ return x.category===k; });
+      if(!items.length){ box.innerHTML='<p class="note">目前沒有問答。</p>'; return; }
+      box.innerHTML=items.map(function(it){
+        var del=qaIsMaster ? ('<button class="qa-del" data-id="'+it.id+'">刪除</button>') : "";
+        return '<div class="qa-item">'+del
+             + '<div class="q">Q：'+qaEsc(it.q)+'</div>'
+             + '<div class="a">A：'+qaEsc(it.a)+'</div></div>';
+      }).join("");
+      box.querySelectorAll(".qa-del").forEach(function(b){
+        b.addEventListener("click",function(){
+          if(!confirm("確定刪除這則問答？")) return;
+          qaDb.collection(QA_COL).doc(b.dataset.id).delete()
+            .catch(function(e){ alert("刪除失敗："+e.message); });
+        });
+      });
+    });
+  }
+
   function openPdf(path,title){
     var abs=new URL(path,location.href).href;
     document.getElementById('pdfTitle').textContent=title;

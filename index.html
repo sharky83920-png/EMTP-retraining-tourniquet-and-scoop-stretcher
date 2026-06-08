@@ -27,7 +27,7 @@
   h2:first-child{margin-top:6px}
   h3{color:var(--blue);margin-bottom:4px}
   .btn{display:inline-block;background:var(--blue);color:#fff;text-decoration:none;padding:12px 20px;
-       border-radius:10px;font-weight:700;margin:8px 8px 8px 0}
+       border-radius:10px;font-weight:700;margin:8px 8px 8px 0;border:0;cursor:pointer;font-family:inherit;font-size:1rem}
   .btn:hover{background:var(--navy)}
   .btn.ghost{background:#eef2f8;color:var(--blue)}
   .video{position:relative;padding-bottom:56.25%;height:0;border-radius:12px;overflow:hidden;margin:10px 0 22px;background:#000}
@@ -37,6 +37,15 @@
   ul{padding-left:1.2em}
   footer{text-align:center;color:#888;font-size:.82rem;padding:18px}
   @media(max-width:520px){ header h1{font-size:1.15rem} .tab{font-size:.95rem} }
+  /* PDF 彈出檢視器 */
+  .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:999;padding:14px}
+  .modal.open{display:flex;align-items:center;justify-content:center}
+  .modal-box{background:#fff;width:100%;max-width:920px;height:90vh;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.45)}
+  .modal-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;background:var(--navy);color:#fff}
+  .modal-bar b{font-size:1rem}
+  .modal-bar a{color:#cfe0f5;font-size:.82rem;text-decoration:underline}
+  .modal-x{background:#fff;color:var(--navy);border:0;border-radius:8px;padding:6px 14px;font-weight:700;cursor:pointer;font-family:inherit}
+  .modal-box iframe{flex:1;border:0;width:100%;background:#fff}
 </style>
 </head>
 <body>
@@ -55,7 +64,7 @@
 <section class="panel active" id="student">
   <h2>課程摘要</h2>
   <p>本站三大主題：止血帶降位／轉換、SMR 證據、鏟式擔架操作。完整摘要請下載：</p>
-  <a class="btn" href="files/課程摘要_學員版.pdf" target="_blank" rel="noopener">課程摘要（PDF）</a>
+  <button class="btn" onclick="openPdf('files/課程摘要_學員版.pdf','課程摘要')">課程摘要（PDF）</button>
 
   <h2>示範影片</h2>
   <h3>止血帶操作</h3>
@@ -74,7 +83,7 @@
 <section class="panel" id="instructor">
   <h2>教學教案</h2>
   <p>50 分鐘純技術操作站完整教案（含時間規劃、器材清單、分站流程、情境卡、同儕檢核表、鏟式器材介紹）。</p>
-  <a class="btn" href="files/指導員教案.pdf" target="_blank" rel="noopener">教學教案（PDF）</a>
+  <button class="btn" onclick="openPdf('files/指導員教案.pdf','教學教案')">教學教案（PDF）</button>
   <a class="btn ghost" href="files/鏟式擔架使用_實證引言.docx">⬇ 實證引言</a>
   <p class="note">提醒：此頁為公開頁面，教案含解答/計分，如不希望外流可改放精簡版。</p>
 </section>
@@ -97,7 +106,35 @@
   115年新北TP複訓　‧　教學用途　‧　以 GitHub Pages 製作
 </footer>
 
+<!-- PDF 彈出檢視器 -->
+<div id="pdfModal" class="modal" onclick="if(event.target===this)closePdf()">
+  <div class="modal-box">
+    <div class="modal-bar">
+      <b id="pdfTitle">PDF</b>
+      <span>
+        <a id="pdfRaw" href="#" target="_blank" rel="noopener">在新分頁開啟原始 PDF</a>
+        &nbsp;
+        <button class="modal-x" onclick="closePdf()">關閉</button>
+      </span>
+    </div>
+    <iframe id="pdfFrame" src="" title="PDF 檢視"></iframe>
+  </div>
+</div>
+
 <script>
+  function openPdf(path,title){
+    var abs=new URL(path,location.href).href;
+    document.getElementById('pdfTitle').textContent=title;
+    document.getElementById('pdfRaw').href=abs;
+    document.getElementById('pdfFrame').src='https://docs.google.com/gview?embedded=true&url='+encodeURIComponent(abs);
+    document.getElementById('pdfModal').classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+  function closePdf(){
+    document.getElementById('pdfModal').classList.remove('open');
+    document.getElementById('pdfFrame').src='';
+    document.body.style.overflow='';
+  }
   document.querySelectorAll('.tab').forEach(function(t){
     t.addEventListener('click',function(){
       document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});

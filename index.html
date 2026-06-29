@@ -110,24 +110,6 @@
     </div>
   </div>
 
-  <!-- 出題管理：僅管理者（master 信箱）登入後可見 -->
-  <div class="qa-form" id="quizForm" style="display:none">
-    <h3>抽題庫管理</h3>
-    <p class="note" style="margin-top:0">於「Q&amp;A」分頁登入後，這裡可即時新增／刪除抽考題（免重新部署）。</p>
-    <textarea class="qa-area" id="quizInScenario" rows="3" placeholder="情境（例：前臂撕裂傷、高位止血帶剛綁 10 分鐘、無休克、非截肢、30 分鐘到院。）"></textarea>
-    <select class="qa-select" id="quizInAnswer">
-      <option value="轉換">轉換（填塞）</option>
-      <option value="降位">降位</option>
-      <option value="直送">直送（不降位、不轉換）</option>
-      <option value="移除">移除止血帶</option>
-    </select>
-    <textarea class="qa-area" id="quizInWhy" rows="3" placeholder="解析（為什麼？中了哪幾盞紅燈）"></textarea>
-    <button class="btn" id="quizAddBtn">新增題目</button>
-    <button class="btn ghost" id="quizSeedBtn">匯入教案預設 5 題</button>
-    <span class="qa-msg" id="quizMsg"></span>
-    <div id="quizManageList" style="margin-top:12px"></div>
-  </div>
-
   <h2>示範影片</h2>
   <h3>止血帶操作</h3>
   <p>① 止血帶降位</p>
@@ -194,6 +176,24 @@
 
   <h2>鏟式擔架</h2>
   <div id="qaList-scoop"><p class="note">載入中…</p></div>
+
+  <!-- 抽題庫管理：僅管理者（master 信箱）登入後可見 -->
+  <div class="qa-form" id="quizForm" style="display:none">
+    <h3>抽題庫管理（學員分頁「抽題練習」用）</h3>
+    <p class="note" style="margin-top:0">登入後可即時新增／刪除抽考題（免重新部署）。題目會出現在「學員」分頁的抽題練習。</p>
+    <textarea class="qa-area" id="quizInScenario" rows="3" placeholder="情境（例：前臂撕裂傷、高位止血帶剛綁 10 分鐘、無休克、非截肢、30 分鐘到院。）"></textarea>
+    <select class="qa-select" id="quizInAnswer">
+      <option value="轉換">轉換（填塞）</option>
+      <option value="降位">降位</option>
+      <option value="直送">直送（不降位、不轉換）</option>
+      <option value="移除">移除止血帶</option>
+    </select>
+    <textarea class="qa-area" id="quizInWhy" rows="3" placeholder="解析（為什麼？中了哪幾盞紅燈）"></textarea>
+    <button class="btn" id="quizAddBtn">新增題目</button>
+    <button class="btn ghost" id="quizSeedBtn">匯入教案預設 5 題</button>
+    <span class="qa-msg" id="quizMsg"></span>
+    <div id="quizManageList" style="margin-top:12px"></div>
+  </div>
 </section>
 
 <footer>

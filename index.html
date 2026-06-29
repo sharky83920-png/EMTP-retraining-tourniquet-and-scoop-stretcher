@@ -68,6 +68,8 @@
   .modal-bar a{color:#cfe0f5;font-size:.82rem;text-decoration:underline}
   .modal-x{background:#fff;color:var(--navy);border:0;border-radius:8px;padding:6px 14px;font-weight:700;cursor:pointer;font-family:inherit}
   .modal-box iframe{flex:1;border:0;width:100%;background:#fff}
+  .img-scroll{flex:1;overflow:auto;background:#fff;display:flex;align-items:flex-start;justify-content:center;padding:12px}
+  .img-scroll img{max-width:100%;height:auto;border-radius:6px}
 </style>
 </head>
 <body>
@@ -88,6 +90,7 @@
   <h2>課程摘要</h2>
   <p>本站三大主題：止血帶降位／轉換、SMR 證據、鏟式擔架操作。完整摘要請下載：</p>
   <button class="btn" onclick="openPdf('files/課程摘要_學員版.pdf','課程摘要')">課程摘要（PDF）</button>
+  <button class="btn ghost" onclick="openImg('files/止血帶轉換降位決策流程.png','止血帶轉換／降位決策流程')">決策流程圖（PNG）</button>
 
   <h2>降位／轉換　應用判斷（抽題練習）</h2>
   <p class="note">看完情境後，先依決策流程在心裡（或實際操作）做出處置決定，<b>再按「看答案」</b>對照。<br>
@@ -212,6 +215,21 @@
       </span>
     </div>
     <iframe id="pdfFrame" src="" title="PDF 檢視"></iframe>
+  </div>
+</div>
+
+<!-- 圖片 彈出檢視器 -->
+<div id="imgModal" class="modal" onclick="if(event.target===this)closeImg()">
+  <div class="modal-box">
+    <div class="modal-bar">
+      <b id="imgTitle">圖片</b>
+      <span>
+        <a id="imgRaw" href="#" target="_blank" rel="noopener">在新分頁開啟原圖</a>
+        &nbsp;
+        <button class="modal-x" onclick="closeImg()">關閉</button>
+      </span>
+    </div>
+    <div class="img-scroll"><img id="imgView" src="" alt="決策流程圖"></div>
   </div>
 </div>
 
@@ -443,6 +461,19 @@
   function closePdf(){
     document.getElementById('pdfModal').classList.remove('open');
     document.getElementById('pdfFrame').src='';
+    document.body.style.overflow='';
+  }
+  function openImg(path,title){
+    var abs=new URL(path,location.href).href;
+    document.getElementById('imgTitle').textContent=title;
+    document.getElementById('imgRaw').href=abs;
+    document.getElementById('imgView').src=abs;
+    document.getElementById('imgModal').classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+  function closeImg(){
+    document.getElementById('imgModal').classList.remove('open');
+    document.getElementById('imgView').src='';
     document.body.style.overflow='';
   }
   document.querySelectorAll('.tab').forEach(function(t){

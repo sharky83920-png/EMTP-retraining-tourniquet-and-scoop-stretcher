@@ -10,6 +10,7 @@
     --green:#1f7a1f; --red:#b00000; --ink:#222;
   }
   *{box-sizing:border-box}
+  [hidden]{display:none!important}
   body{margin:0;font-family:"Microsoft JhengHei","Noto Sans TC",system-ui,sans-serif;color:var(--ink);background:var(--bg);line-height:1.7}
   header{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;padding:28px 18px;text-align:center}
   header h1{margin:0 0 6px;font-size:1.45rem}
@@ -45,6 +46,17 @@
   .qa-form{background:#eef4ff;border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}
   .qa-form h3{margin-top:0}
   .qa-msg{color:var(--green);font-size:.88rem;margin-left:8px}
+  /* 抽題練習 */
+  .quiz{background:#eef4ff;border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 0 22px}
+  .quiz-meta{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+  .quiz-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 18px 20px;min-height:92px}
+  .quiz-q{font-size:1.08rem;font-weight:600;color:var(--ink);line-height:1.8}
+  .quiz-num{display:inline-block;background:var(--navy);color:#fff;border-radius:8px;padding:1px 9px;font-size:.82rem;font-weight:700;margin-right:8px;vertical-align:2px}
+  .quiz-ans{margin-top:14px;border-top:1px dashed var(--line);padding-top:13px}
+  .quiz-badge{display:inline-block;font-weight:800;font-size:1.05rem;color:#fff;padding:6px 18px;border-radius:999px}
+  .quiz-why{margin-top:10px;color:#444;white-space:pre-wrap;line-height:1.75}
+  .quiz-btns{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+  .quiz-manage-item{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:6px 0;background:#fff;font-size:.9rem}
   footer{text-align:center;color:#888;font-size:.82rem;padding:18px}
   @media(max-width:520px){ header h1{font-size:1.15rem} .tab{font-size:.95rem} }
   /* PDF 彈出檢視器 */
@@ -76,6 +88,45 @@
   <h2>課程摘要</h2>
   <p>本站三大主題：止血帶降位／轉換、SMR 證據、鏟式擔架操作。完整摘要請下載：</p>
   <button class="btn" onclick="openPdf('files/課程摘要_學員版.pdf','課程摘要')">課程摘要（PDF）</button>
+
+  <h2>降位／轉換　應用判斷（抽題練習）</h2>
+  <p class="note">看完情境後，先依決策流程在心裡（或實際操作）做出處置決定，<b>再按「看答案」</b>對照。<br>
+    口訣 <b>「酒到斷 So Good」</b> — 超時&gt;6h、快到院、截肢、休克、顧不到；五項皆無才可<b>轉換</b>，只有黃燈（截肢／休克／顧不到）<b>降位</b>，有紅（超時）或藍（快到院）<b>直送</b>。</p>
+  <div class="quiz">
+    <div class="quiz-meta">
+      <span id="quizCount" class="note">題庫載入中…</span>
+      <span id="quizAdminTag" class="note"></span>
+    </div>
+    <div class="quiz-card">
+      <div class="quiz-q" id="quizQ">按下方「抽一題」開始練習。</div>
+      <div class="quiz-ans" id="quizAns" hidden>
+        <span class="quiz-badge" id="quizBadge"></span>
+        <div class="quiz-why" id="quizWhy"></div>
+      </div>
+    </div>
+    <div class="quiz-btns">
+      <button class="btn" id="quizDraw">抽一題</button>
+      <button class="btn ghost" id="quizReveal" hidden>看答案</button>
+    </div>
+  </div>
+
+  <!-- 出題管理：僅管理者（master 信箱）登入後可見 -->
+  <div class="qa-form" id="quizForm" style="display:none">
+    <h3>抽題庫管理</h3>
+    <p class="note" style="margin-top:0">於「Q&amp;A」分頁登入後，這裡可即時新增／刪除抽考題（免重新部署）。</p>
+    <textarea class="qa-area" id="quizInScenario" rows="3" placeholder="情境（例：前臂撕裂傷、高位止血帶剛綁 10 分鐘、無休克、非截肢、30 分鐘到院。）"></textarea>
+    <select class="qa-select" id="quizInAnswer">
+      <option value="轉換">轉換（填塞）</option>
+      <option value="降位">降位</option>
+      <option value="直送">直送（不降位、不轉換）</option>
+      <option value="移除">移除止血帶</option>
+    </select>
+    <textarea class="qa-area" id="quizInWhy" rows="3" placeholder="解析（為什麼？中了哪幾盞紅燈）"></textarea>
+    <button class="btn" id="quizAddBtn">新增題目</button>
+    <button class="btn ghost" id="quizSeedBtn">匯入教案預設 5 題</button>
+    <span class="qa-msg" id="quizMsg"></span>
+    <div id="quizManageList" style="margin-top:12px"></div>
+  </div>
 
   <h2>示範影片</h2>
   <h3>止血帶操作</h3>
@@ -205,6 +256,10 @@
       ? (qaIsMaster ? ("管理者："+u.email) : ("（"+u.email+" 無編輯權限）"))
       : "";
     qaRender();
+    var qf=document.getElementById("quizForm");
+    if(qf) qf.style.display = qaIsMaster ? "block" : "none";
+    document.getElementById("quizAdminTag").textContent = qaIsMaster ? "管理者模式" : "";
+    quizRenderManage();
   });
 
   document.getElementById("qaAddBtn").addEventListener("click",function(){
@@ -250,6 +305,129 @@
           qaDb.collection(QA_COL).doc(b.dataset.id).delete()
             .catch(function(e){ alert("刪除失敗："+e.message); });
         });
+      });
+    });
+  }
+
+  /* ===== 降位／轉換 抽題練習（Firestore: tpRetrainQuiz）===== */
+  const QUIZ_COL = "tpRetrainQuiz";
+  const QUIZ_COLORS = { "轉換":"#1f7a1f", "降位":"#b8860b", "直送":"#2e5a88", "移除":"#0f766e" };
+  const QUIZ_LABELS = { "轉換":"轉換（填塞）", "降位":"降位", "直送":"直送（不降位、不轉換）", "移除":"移除止血帶" };
+  // 教案預設 5 題（Firestore 為空或尚未啟用時的後備題庫；管理者可一鍵匯入）
+  const QUIZ_DEFAULTS = [
+    { scenario:"前臂撕裂傷、高位止血帶剛綁 10 分鐘、無休克、非截肢、無其他傷勢、30 分鐘到院。",
+      answer:"轉換", why:"五紅燈皆無 → 可轉換：傷口填塞＋加壓敷料控制出血後，緩慢鬆開止血帶（>1 分鐘）並留原位。" },
+    { scenario:"大腿槍傷、高位止血帶剛綁 20 分鐘、無休克、非截肢、無其他傷勢、2 小時到院。",
+      answer:"轉換", why:"五紅燈皆無、到院時間長 → 轉換成填塞，恢復遠端血流。" },
+    { scenario:"小腿截肢、高位止血帶綁 1 小時、CRT 3 秒、無其他傷勢、60 分鐘到院。",
+      answer:"降位", why:"截肢（黃燈）→ 不轉換；無紅／藍燈 → 降位到傷口近端 2–3 吋、貼皮膚的單一骨幹處。" },
+    { scenario:"手腕截肢、高位止血帶綁 50 分鐘、無休克、有 IICP、低血氧。",
+      answer:"降位", why:"截肢（黃燈）→ 降位。本例傷勢複雜、優先後送，直接送醫亦可（直送沒有不行）。" },
+    { scenario:"前臂撕裂傷、高位止血帶已綁 6 小時、無休克、非截肢、無其他傷勢、30 分鐘到院。",
+      answer:"直送", why:"超時 >6 小時（紅燈）→ 不降位、不轉換，直接送醫；途中監測肢體功能、必要時重新打緊。" }
+  ];
+
+  let quizPool = [];   // Firestore 題目（有則優先用）
+  let quizCur = -1;
+  let quizRevealed = false;
+
+  function quizSource(){ return quizPool.length ? quizPool : QUIZ_DEFAULTS; }
+
+  function quizUpdateCount(){
+    var n = quizSource().length;
+    var src = quizPool.length ? "雲端題庫" : "教案預設";
+    document.getElementById("quizCount").textContent = "共 " + n + " 題（" + src + "）";
+  }
+
+  function quizDraw(){
+    var src = quizSource();
+    if(!src.length){ return; }
+    var i;
+    do { i = Math.floor(Math.random()*src.length); } while(src.length>1 && i===quizCur);
+    quizCur = i; quizRevealed = false;
+    var it = src[i];
+    document.getElementById("quizQ").innerHTML =
+      '<span class="quiz-num">第 '+(i+1)+' 題</span>' + qaEsc(it.scenario);
+    document.getElementById("quizAns").hidden = true;
+    document.getElementById("quizReveal").hidden = false;
+    document.getElementById("quizDraw").textContent = "換一題";
+  }
+
+  function quizReveal(){
+    var it = quizSource()[quizCur];
+    if(!it) return;
+    var badge = document.getElementById("quizBadge");
+    badge.textContent = QUIZ_LABELS[it.answer] || it.answer;
+    badge.style.background = QUIZ_COLORS[it.answer] || "#555";
+    document.getElementById("quizWhy").textContent = it.why || "";
+    document.getElementById("quizAns").hidden = false;
+    document.getElementById("quizReveal").hidden = true;
+    document.getElementById("quizDraw").textContent = "下一題";
+    quizRevealed = true;
+  }
+
+  document.getElementById("quizDraw").addEventListener("click", quizDraw);
+  document.getElementById("quizReveal").addEventListener("click", quizReveal);
+
+  // 即時讀取 Firestore 題庫
+  qaDb.collection(QUIZ_COL).orderBy("createdAt","asc").onSnapshot(function(snap){
+    quizPool = snap.docs.map(function(d){ var o=d.data(); o.id=d.id; return o; });
+    quizUpdateCount();
+    quizRenderManage();
+  }, function(e){
+    quizPool = [];
+    quizUpdateCount();
+  });
+  quizUpdateCount();
+
+  // 管理者：新增題目
+  document.getElementById("quizAddBtn").addEventListener("click", function(){
+    var s=document.getElementById("quizInScenario").value.trim();
+    var a=document.getElementById("quizInAnswer").value;
+    var w=document.getElementById("quizInWhy").value.trim();
+    if(!s){ quizShowMsg("請填寫情境"); return; }
+    qaDb.collection(QUIZ_COL).add({
+      scenario:s, answer:a, why:w,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function(){
+      document.getElementById("quizInScenario").value="";
+      document.getElementById("quizInWhy").value="";
+      quizShowMsg("已新增 ✅");
+    }).catch(function(e){ quizShowMsg("新增失敗："+e.message); });
+  });
+
+  // 管理者：一鍵匯入教案預設 5 題
+  document.getElementById("quizSeedBtn").addEventListener("click", function(){
+    if(!confirm("將教案預設 5 題寫入雲端題庫？（會新增 5 筆，不會刪除現有題目）")) return;
+    var batch = qaDb.batch();
+    QUIZ_DEFAULTS.forEach(function(it){
+      var ref = qaDb.collection(QUIZ_COL).doc();
+      batch.set(ref, { scenario:it.scenario, answer:it.answer, why:it.why,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    });
+    batch.commit()
+      .then(function(){ quizShowMsg("已匯入 5 題 ✅"); })
+      .catch(function(e){ quizShowMsg("匯入失敗："+e.message); });
+  });
+
+  function quizShowMsg(t){ var e=document.getElementById("quizMsg"); e.textContent=t; setTimeout(function(){e.textContent="";},3000); }
+
+  // 管理者：題庫清單＋刪除
+  function quizRenderManage(){
+    var box=document.getElementById("quizManageList");
+    if(!box) return;
+    if(!qaIsMaster){ box.innerHTML=""; return; }
+    if(!quizPool.length){ box.innerHTML='<p class="note">雲端題庫目前是空的。可按上方「匯入教案預設 5 題」建立，或自行新增。</p>'; return; }
+    box.innerHTML = quizPool.map(function(it){
+      return '<div class="quiz-manage-item"><div><b>['+(QUIZ_LABELS[it.answer]||it.answer)+']</b> '
+           + qaEsc(it.scenario) + '</div>'
+           + '<button class="qa-del" data-id="'+it.id+'">刪除</button></div>';
+    }).join("");
+    box.querySelectorAll(".qa-del").forEach(function(b){
+      b.addEventListener("click", function(){
+        if(!confirm("確定刪除這題？")) return;
+        qaDb.collection(QUIZ_COL).doc(b.dataset.id).delete()
+          .catch(function(e){ alert("刪除失敗："+e.message); });
       });
     });
   }
